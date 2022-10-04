@@ -12,11 +12,12 @@ import Footer from "@/components/Footer/index";
 export default {
   name: "app",
   components: { Header, Footer },
-  data() {
+  data () {
     return {};
   },
 
-  mounted() {},
+  mounted () {
+  },
 
   methods: {},
 };

@@ -2,37 +2,47 @@
   <div class="type-nav">
     <div class="container">
       <!-- 事件委托 -->
-      <div @mouseleave="remove">
+      <div @mouseleave="remove"
+           @mouseenter="typeShow">
         <h2 class="all">全部商品分类</h2>
-        <div class="sort">
-          <div class="all-sort-list2">
-            <div class="item"
-                 :class="{cur:currentIndex == item.categoryId}"
-                 v-for="item in categoryList"
-                 :key="item.categoryId">
-              <h3 @mouseenter="move(item.categoryId)">
-                <a href="">{{item.categoryName}}</a>
-              </h3>
-              <div class="item-list clearfix">
-                <div class="subitem">
-                  <dl class="fore"
-                      v-for="item1 in item.categoryChild"
-                      :key="item1.categoryId">
-                    <dt>
-                      <a href="">{{item1.categoryName}}</a>
-                    </dt>
-                    <dd>
-                      <em v-for="item2 in item1.categoryChild"
-                          :key="item2.categoryId">
-                        <a href="">{{item2.categoryName}}</a>
-                      </em>
-                    </dd>
-                  </dl>
+        <transition name="sort">
+          <div class="sort"
+               v-show="show">
+            <div class="all-sort-list2"
+                 @click="goSearch($event)">
+              <div class="item"
+                   :class="{cur:currentIndex == item.categoryId}"
+                   v-for="item in categoryList"
+                   :key="item.categoryId">
+                <h3 @mouseenter="move(item.categoryId)">
+                  <a :data-categoryName='item.categoryName'
+                     :data-category1Id='item.categoryId'>{{item.categoryName}}</a>
+                </h3>
+                <!-- 二三级分类 -->
+                <div class="item-list clearfix"
+                     v-show="item.categoryId == currentIndex">
+                  <div class="subitem">
+                    <dl class="fore"
+                        v-for="item1 in item.categoryChild"
+                        :key="item1.categoryId">
+                      <dt>
+                        <a :data-categoryName='item1.categoryName'
+                           :data-category2Id='item1.categoryId'>{{item1.categoryName}}</a>
+                      </dt>
+                      <dd>
+                        <em v-for="item2 in item1.categoryChild"
+                            :key="item2.categoryId">
+                          <a :data-categoryName='item2.categoryName'
+                             :data-category3Id='item2.categoryId'>{{item2.categoryName}}</a>
+                        </em>
+                      </dd>
+                    </dl>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </transition>
       </div>
       <nav class="nav">
         <a href="###">服装城</a>
@@ -44,19 +54,20 @@
         <a href="###">有趣</a>
         <a href="###">秒杀</a>
       </nav>
-
     </div>
   </div>
 </template>
 
 <script>
+import throttle from 'lodash/throttle'
 import { mapState } from 'vuex';
 export default {
   name: 'TypeNav',
 
   data () {
     return {
-      currentIndex: 0
+      currentIndex: 0,
+      show: true
     };
   },
   computed: {
@@ -65,15 +76,38 @@ export default {
     })
   },
   mounted () {
-    this.$store.dispatch('categoryList')
+    if (this.$route.path != '/') {
+      this.show = false
+    }
   },
 
   methods: {
-    move (index) {
+    move: throttle(function (index) {
       this.currentIndex = index
-    },
+    }, 50),
     remove () {
       this.currentIndex = 0
+      if (this.$route.path != '/') this.show = false
+    },
+    typeShow () {
+      this.show = true
+    },
+    goSearch (e) {
+      let element = e.target
+      let { categoryname, category1id, category2id, category3id } = element.dataset
+      if (categoryname) {
+        let location = { name: 'search' }
+        let query = { categoryName: categoryname }
+        if (category1id) {
+          query.category1Id = category1id
+        } else if (category2id) {
+          query.category2Id = category2id
+        } else {
+          query.category3Id = category3id
+        }
+        location.query = query
+        this.$router.push(location)
+      }
     }
   },
 };
@@ -136,11 +170,12 @@ export default {
 
             a {
               color: #333;
+              cursor: pointer;
             }
           }
 
           .item-list {
-            display: none;
+            // display: none;
             position: absolute;
             width: 734px;
             min-height: 460px;
@@ -172,6 +207,7 @@ export default {
                   text-align: right;
                   padding: 3px 6px 0 0;
                   font-weight: 700;
+                  cursor: pointer;
                 }
 
                 dd {
@@ -187,22 +223,41 @@ export default {
                     padding: 0 8px;
                     margin-top: 5px;
                     border-left: 1px solid #ccc;
+                    cursor: pointer;
                   }
                 }
               }
             }
           }
 
-          &:hover {
-            .item-list {
-              display: block;
-            }
-          }
+          // &:hover {
+          //   .item-list {
+          //     display: block;
+          //   }
+          // }
         }
         .cur {
           background-color: skyblue;
         }
       }
+    }
+    .sort-enter {
+      height: 0;
+    }
+    .sort-enter-to {
+      height: 461px;
+    }
+    .sort-enter-active {
+      transition: all 0.5s linear;
+    }
+    .sort-leave {
+      height: 461px;
+    }
+    .sort-leave-to {
+      height: 0px;
+    }
+    .sort-leave-active {
+      transition: all 0.5s linear;
     }
   }
 }

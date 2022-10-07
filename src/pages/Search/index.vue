@@ -1,5 +1,6 @@
 <template>
   <div class="search">
+    <TypeNav />
     <h2>
       {{$route.query.search}}
     </h2>
@@ -11,22 +12,21 @@
 export default {
   name: 'search',
 
-  data() {
+  data () {
     return {
-      
+
     };
   },
 
-  mounted() {
-    
+  mounted () {
+
   },
 
   methods: {
-    
+
   },
 };
 </script>
 
 <style lang="scss" scoped>
-
 </style>

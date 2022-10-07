@@ -4,6 +4,7 @@ import Router from 'vue-router'
 import router from '@/router'
 // 三级联动组件---全局组件
 import TypeNav from '@/components/TyepeNav'
+// 引入lodash
 // 引入仓库
 import store from '@/store'
 
